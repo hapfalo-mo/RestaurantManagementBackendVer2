@@ -71,7 +71,6 @@ func TestLoginWrongPassword(t *testing.T) {
 // Invalid Phone number
 func TestLoginInvalidPhone(t *testing.T) {
 	routers := setUpRoutes()
-
 	// set up payload
 	login_payload := []byte(`{
 		"phone":"12343567899",
@@ -94,5 +93,33 @@ func TestLoginInvalidPhone(t *testing.T) {
 		t.Fatalf("Failed to decode response: %v", err)
 	} else {
 		t.Logf("Error Message %v", body["error"])
+	}
+}
+
+// Empty Phone number
+func TestEmptyField(t *testing.T) {
+	routers := setUpRoutes()
+	// Prepare payload
+	login_payload := []byte(`{
+		"phone":"",
+		"password" :""
+	}`)
+	req, err := http.NewRequest(http.MethodPost, "/api/v1/users/login", bytes.NewBuffer(login_payload))
+	if err != nil {
+		t.Fatalf("Can not send request: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	rec := httptest.NewRecorder()
+	routers.ServeHTTP(rec, req)
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("Expected 400 Bad Request, got %d", rec.Code)
+	}
+	var body map[string]interface{}
+	err = json.Unmarshal(rec.Body.Bytes(), &body)
+	if err != nil {
+		t.Fatalf("Failed to decode response: %v", err)
+	} else {
+		t.Logf("Error Message: %v", body["error"])
 	}
 }

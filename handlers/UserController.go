@@ -72,7 +72,7 @@ func (u *UserController) LoginToken(c *gin.Context) {
 	var request *dto.LoginRequest
 	err := c.ShouldBind(&request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": custom.ErrBadRequest})
+		c.JSON(http.StatusBadRequest, gin.H{"error": custom.ErrEmptyLoginRequest})
 		return
 	}
 	if u.service == nil {
