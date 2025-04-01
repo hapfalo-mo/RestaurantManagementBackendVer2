@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	custom "RestuarantBackend/custom"
 	dto "RestuarantBackend/models/dto"
 	models "RestuarantBackend/models/dto"
 	"strconv"
@@ -30,16 +31,16 @@ func (u *UserController) Register(c *gin.Context) {
 	var request dto.SignupRequest
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": custom.ErrBadRequest})
 		return
 	}
 	if u.service == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Service is not initialized"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": custom.ErrInternalServer})
 		return
 	}
-	result, err := u.service.Register(request)
+	_, err = u.service.Register(request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Message": result})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"Message": "Success! Please wait..."})
@@ -51,16 +52,16 @@ func (u *UserController) Login(c *gin.Context) {
 	// gan gia tri tu request vao request
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": custom.ErrBadRequest})
 		return
 	}
 	if u.service == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Service is not initialized"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": custom.ErrInternalServer})
 		return
 	}
 	result, err := u.service.Login(request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Message": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"Message": "Login Success", "Data": result})
@@ -71,16 +72,16 @@ func (u *UserController) LoginToken(c *gin.Context) {
 	var request *dto.LoginRequest
 	err := c.ShouldBind(&request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": custom.ErrBadRequest})
 		return
 	}
 	if u.service == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Service is not initialized"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": custom.ErrInternalServer})
 		return
 	}
 	result, err := u.service.TokenLogin(request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Message": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	// Save Token into Cookie
@@ -136,17 +137,17 @@ func (u *UserController) GetAllUSerPagingList(c *gin.Context) {
 	var request *models.PagingRequest
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Message": "Error in Step 1 in GetAllUserPagingList"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error in Step 1 in GetAllUserPagingList"})
 		return
 	}
 
 	if u.service == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Message": "Internal Error in GetAllUserPagingList"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Error in GetAllUserPagingList"})
 		return
 	}
 	result, err := u.service.PagingListAllUser(request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Message": "Error in Step 2 in GetAllUserPaging List"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error in Step 2 in GetAllUserPaging List"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"Data": result})

@@ -1,6 +1,7 @@
 package service
 
 import (
+	custom "RestuarantBackend/custom"
 	"RestuarantBackend/db"
 	"RestuarantBackend/interfaces"
 	"RestuarantBackend/models"
@@ -60,14 +61,18 @@ func (u UserService) Login(request *dto.LoginRequest) (*dto.LoginResponse, error
 	var user dto.LoginResponse
 	// Check Legal Password
 	if !u.isLegalPassword(request.Password) {
-		return &dto.LoginResponse{}, errors.New("Password must be at least 10 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character")
+		return nil, custom.ErrInvalidPassword
+	}
+	isValid, err := isPhoneValid(request.Phone)
+	if !isValid || err != nil {
+		return nil, custom.ErrInValidPhone
 	}
 	// Saltin Password with Phone Number
 	newPassword := request.Password + request.Phone
 	// Hash Password
 	newHashedPassword := hashPassword(newPassword)
 	querry := "SELECT id,phone_number,email,full_name,role,point FROM user WHERE phone_number = ? AND password = ? AND deleted_at IS NULL"
-	err := db.DB.QueryRow(querry, request.Phone, newHashedPassword).Scan(
+	err = db.DB.QueryRow(querry, request.Phone, newHashedPassword).Scan(
 		&user.Id,
 		&user.Email,
 		&user.FullName,
@@ -76,9 +81,9 @@ func (u UserService) Login(request *dto.LoginRequest) (*dto.LoginResponse, error
 		&user.Point,
 	)
 	if err == sql.ErrNoRows {
-		return nil, errors.New("Phone Number or Password is in correct !")
+		return nil, custom.ErrUserNotFound
 	} else if err != nil {
-		return &dto.LoginResponse{}, errors.New("Database is error. Please try again")
+		return nil, custom.ErrDbConnect
 	}
 	return &user, nil
 }
@@ -91,7 +96,7 @@ func (u UserService) TokenLogin(request *dto.LoginRequest) (string, error) {
 	}
 	token, err := CreateToken(user)
 	if err != nil {
-		return "", err
+		return "", custom.ErrCreatingToken
 	}
 	return token, nil
 }
@@ -280,4 +285,14 @@ func isDuplicatePhoneNumberForUpdate(phone string, id int) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+// Check format phone number
+func isPhoneValid(phone string) (bool, error) {
+	pattern := `^0[0-9]{8,9}`
+	matched, err := regexp.MatchString(pattern, phone)
+	if err != nil {
+		return false, custom.ErrInValidPhone
+	}
+	return matched, nil
 }
