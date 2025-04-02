@@ -20,9 +20,13 @@ type UserService struct {
 }
 
 func (u UserService) Register(request dto.SignupRequest) (message string, err error) {
-
+	// Check Empty Values
+	if request.Email == "" || request.FullName == "" || request.Password == "" || request.PhoneNumber == "" {
+		return "", custom.ErrEmptySignupRequest
+	}
 	// Check Duplicate Email
 	isDup, err := u.isDuplicateEmail(request.Email)
+	isPhoneValid, err := isPhoneValid(request.PhoneNumber)
 	if err != nil || isDup == false {
 		message = "Email already exists"
 		err = errors.New("Email already exists")
@@ -30,9 +34,11 @@ func (u UserService) Register(request dto.SignupRequest) (message string, err er
 	}
 	// Check Legal Password
 	if !u.isLegalPassword(request.Password) {
-		message = "Password must be at least 10 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character"
-		err = errors.New("Password must be at least 10 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character")
-		return message, err
+		return "", custom.ErrInvalidPassword
+	}
+	// Check Valid Phone number
+	if !isPhoneValid {
+		return "", custom.ErrInValidPhone
 	}
 	isDup, err = u.isDuplicatePhoneNumber(request.PhoneNumber)
 	// Check Duplicate PhoneNumber

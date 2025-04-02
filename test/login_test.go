@@ -1,37 +1,26 @@
 package test
 
 import (
-	"RestuarantBackend/routers"
 	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/gin-gonic/gin"
 )
-
-func setUpRoutes() *gin.Engine {
-	gin.SetMode(gin.TestMode)
-	r := gin.Default()
-	routers.SetRoutesAPI(r)
-	return r
-}
 
 // Happy version
 func TestLogin(t *testing.T) {
-	router := setUpRoutes()
+	router := SetUpRoutes()
 	// set up login payload
 	login_payload := []byte(`{
 		"phone":"0906371703",
-		"password":"HJ10xugb"
+		"password":"HJ10xugb123*"
 	}`)
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/users/login", bytes.NewBuffer(login_payload))
 	if err != nil {
 		t.Fatalf("Could not create request: %v", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-
 	// Record the response
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
@@ -42,7 +31,7 @@ func TestLogin(t *testing.T) {
 
 // Wrong password
 func TestLoginWrongPassword(t *testing.T) {
-	router := setUpRoutes()
+	router := SetUpRoutes()
 	// set up payload
 	login_payload := []byte(`{
 		"phone":"0906371703",
@@ -70,7 +59,7 @@ func TestLoginWrongPassword(t *testing.T) {
 
 // Invalid Phone number
 func TestLoginInvalidPhone(t *testing.T) {
-	routers := setUpRoutes()
+	routers := SetUpRoutes()
 	// set up payload
 	login_payload := []byte(`{
 		"phone":"12343567899",
@@ -98,7 +87,7 @@ func TestLoginInvalidPhone(t *testing.T) {
 
 // Empty Phone number
 func TestEmptyField(t *testing.T) {
-	routers := setUpRoutes()
+	routers := SetUpRoutes()
 	// Prepare payload
 	login_payload := []byte(`{
 		"phone":"",

@@ -31,7 +31,7 @@ func (u *UserController) Register(c *gin.Context) {
 	var request dto.SignupRequest
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": custom.ErrBadRequest})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	if u.service == nil {
