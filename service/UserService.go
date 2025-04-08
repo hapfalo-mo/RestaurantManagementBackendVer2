@@ -43,9 +43,7 @@ func (u UserService) Register(request dto.SignupRequest) (message string, err er
 	isDup, err = u.isDuplicatePhoneNumber(request.PhoneNumber)
 	// Check Duplicate PhoneNumber
 	if err != nil || isDup == false {
-		message = "Phone number already exists"
-		err = errors.New("Phone number already exists")
-		return message, err
+		return "", custom.ErrDuplicatePhoneNumber
 	}
 	// Salting Password
 	newPassword := request.Password + request.PhoneNumber

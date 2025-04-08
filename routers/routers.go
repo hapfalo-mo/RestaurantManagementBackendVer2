@@ -28,6 +28,7 @@ func SetRoutesAPI(r *gin.Engine) {
 			users.POST("/login-googgle", userController.LoginGoogle)
 			users.PUT("/updateUser", middleware.AuthenticateMiddleware, userController.Update)
 			users.POST("/getAllUser", middleware.AuthenAdminMiddelWare, userController.GetAllUSerPagingList)
+			users.POST("/getAllUserVer2", middleware.AuthenticateMiddleware, userController.GetAllUser)
 			users.GET("/export-csvFile", middleware.AuthenAdminMiddelWare, userController.ExportUserCSVFile)
 			users.PUT("/block-unblock-user/:id", middleware.AuthenAdminMiddelWare, userController.BlockOrUnblockUser)
 		}
@@ -36,6 +37,7 @@ func SetRoutesAPI(r *gin.Engine) {
 			bookings.POST("/bookTable", middleware.AuthenticateMiddleware, bookingController.BookingTable)
 			bookings.POST("/getBooking/:id", middleware.AuthenticateMiddleware, bookingController.PagingBookingList)
 			bookings.POST("/get-all-bookings", middleware.AuthenAdminMiddelWare, bookingController.PagingAllBookingList)
+
 		}
 		foods := v1.Group("/foods")
 		{

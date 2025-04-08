@@ -50,6 +50,26 @@ func TestRegisterHandlers(t *testing.T) {
 			ExpectedStatusCode: http.StatusBadRequest,
 			ExpectedErrMessage: fmt.Sprintf(`{"error":"%s"}`, custom.ErrInValidPhone),
 		},
+		// {
+		// 	Name: "Duplicate Phone Number",
+		// 	Body: dto.SignupRequest{
+		// 		PhoneNumber: "0702830142",
+		// 		Password:    "HJ10xugb123*",
+		// 		Email:       "chuongnguyen16112005@gmail.com",
+		// 		FullName:    "Chuong Nguyen",
+		// 	},
+		// 	ExpectedStatusCode: http.StatusBadRequest,
+		// 	ExpectedErrMessage: fmt.Sprintf(`{"error":"%s"}`, custom.ErrDuplicatePhoneNumber),
+		// },
+		// {
+		// 	Name: "Duplicate PhoneNumber",
+		// 	Body: dto.SignupRequest{
+		// 		PhoneNumber: "0908333987",
+		// 		Password:    "HJ10xugb123*",
+		// 		Email:       "chuongnguyen16112002@gmail.com",
+		// 		FullName:    "Chuong Nguyen",
+		// 	},
+		// },
 	}
 
 	for _, tc := range signupSamples {

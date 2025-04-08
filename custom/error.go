@@ -15,4 +15,5 @@ var (
 	ErrEmptySignupRequest   = errors.New("Empty value")
 	ErrDuplicatePhoneNumber = errors.New("Phone number is duplicated!")
 	ErrInvalidEmail         = errors.New("Email is not valid")
+	ErrDuplicateEmail       = errors.New("Email is duplicated")
 )

@@ -8,7 +8,6 @@ import (
 
 	custom "RestuarantBackend/custom"
 	dto "RestuarantBackend/models/dto"
-	models "RestuarantBackend/models/dto"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -100,7 +99,7 @@ func (u *UserController) LoginGoogle(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Service doesn't work!"})
 		return
 	}
-	var data *models.LoginGoogleRequest
+	var data *dto.LoginGoogleRequest
 	err = json.Unmarshal([]byte(request), &data)
 	result, err := u.service.LoginGoogle(data)
 	if err != nil {
@@ -134,7 +133,7 @@ func (u *UserController) Update(c *gin.Context) {
 
 // Get all User
 func (u *UserController) GetAllUSerPagingList(c *gin.Context) {
-	var request *models.PagingRequest
+	var request *dto.PagingRequest
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error in Step 1 in GetAllUserPagingList"})
@@ -190,4 +189,18 @@ func (u *UserController) BlockOrUnblockUser(c *gin.Context) {
 		c.JSON(http.StatusNotAcceptable, err)
 	}
 	c.JSON(http.StatusOK, gin.H{"Message": result})
+}
+
+// Get All User Test
+func (u *UserController) GetAllUser(c *gin.Context) {
+	if u.service == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Service does not work"})
+		return
+	}
+	ok, err := u.service.GetAllUser()
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Cannot return value"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"body": ok})
 }

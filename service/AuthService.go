@@ -3,6 +3,7 @@ package service
 import (
 	dto "RestuarantBackend/models/dto"
 	"errors"
+	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -61,4 +62,35 @@ func ParseToken(tokenString string) (*Claims, error) {
 		return nil, err
 	}
 	return claims, nil
+}
+
+func CallApiCheckUser(token string) (bool, error) {
+	url := "http://localhost:1703/api/v1/users/verify-user-access"
+	req, err := http.NewRequest("POST", url, nil)
+	if err != nil {
+		return false, err
+	}
+	req.AddCookie(&http.Cookie{
+		Name:  "token",
+		Value: token,
+	})
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return false, errors.New("Failed in veriy user!")
+	}
+	// body, err := io.ReadAll(resp.Body)
+	// if err != nil {
+	// 	return false, err
+	// }
+	// var loginResponse dto.LoginResponse
+	// err = json.Unmarshal(body, loginResponse)
+	// if err != nil {
+	// 	return false, err
+	// }
+	return true, nil
 }
