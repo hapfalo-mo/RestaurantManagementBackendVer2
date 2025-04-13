@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"RestuarantBackend/custom"
+	custom "RestuarantBackend/error"
 	dto "RestuarantBackend/models/dto"
 
 	"github.com/stretchr/testify/assert"

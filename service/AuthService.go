@@ -70,10 +70,7 @@ func CallApiCheckUser(token string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	req.AddCookie(&http.Cookie{
-		Name:  "token",
-		Value: token,
-	})
+	req.Header.Add("Authorization", "Bearer "+token)
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {

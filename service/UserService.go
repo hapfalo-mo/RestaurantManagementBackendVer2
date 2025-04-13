@@ -1,8 +1,8 @@
 package service
 
 import (
-	custom "RestuarantBackend/custom"
 	"RestuarantBackend/db"
+	custom "RestuarantBackend/error"
 	"RestuarantBackend/interfaces"
 	"RestuarantBackend/models"
 	dto "RestuarantBackend/models/dto"

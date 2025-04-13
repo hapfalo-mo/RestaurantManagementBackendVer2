@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	custom "RestuarantBackend/custom"
+	custom "RestuarantBackend/error"
 	dto "RestuarantBackend/models/dto"
 	"strconv"
 
