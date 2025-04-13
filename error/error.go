@@ -16,4 +16,9 @@ var (
 	ErrDuplicatePhoneNumber = errors.New("Phone number is duplicated!")
 	ErrInvalidEmail         = errors.New("Email is not valid")
 	ErrDuplicateEmail       = errors.New("Email is duplicated")
+
+	// Order Error
+	ErrOrderInsertValue     = errors.New("Error in Insert Value Order into Database")
+	ErrOrderGetllOrder      = errors.New("Error in Get All Order into Database")
+	ErrOrderGetAllOrderScan = errors.New("Error in Get All Order Scan from database")
 )

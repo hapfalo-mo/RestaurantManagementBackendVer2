@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"RestuarantBackend/custom"
+	errorList "RestuarantBackend/error"
 	"RestuarantBackend/interfaces"
 	"fmt"
 	"net/http"
@@ -28,19 +30,27 @@ func (o *OrderControlloer) CreateNewOrder(c *gin.Context) {
 	var request dto.OrderCreateRequest
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "Bad Request"})
+		c.JSON(http.StatusBadRequest, custom.Error{
+			Message:    errorList.ErrBadRequest.Error(),
+			ErrorField: err.Error(),
+			Field:      "OrderController - CreateNewOrder",
+		})
 		return
 	}
 	if o.service == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Internal Error"})
+		c.JSON(http.StatusInternalServerError, custom.Error{
+			Message:    errorList.ErrInternalServer.Error(),
+			ErrorField: err.Error(),
+			Field:      "OrderController - CreateNewOrder",
+		})
 		return
 	}
-	result, err := o.service.CreateNewOrder(&request)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"Error": "Wrong in processing.."})
+	result, errResponse := o.service.CreateNewOrder(&request)
+	if errResponse.Message != "" {
+		c.JSON(http.StatusNotFound, errResponse)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"Data": result})
+	c.JSON(http.StatusOK, result)
 }
 
 // Create new Order
@@ -48,19 +58,26 @@ func (o *OrderControlloer) CreateOrderItems(c *gin.Context) {
 	var request dto.OrderItemRequest
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "Bad Request"})
-		return
+		c.JSON(http.StatusBadRequest, custom.Error{
+			Message:    errorList.ErrBadRequest.Error(),
+			ErrorField: err.Error(),
+			Field:      "OrderController - CreateOrderItems",
+		})
 	}
 	if o.service == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Internal Error"})
+		c.JSON(http.StatusInternalServerError, custom.Error{
+			Message:    errorList.ErrInternalServer.Error(),
+			ErrorField: err.Error(),
+			Field:      "OrderController - CreateNewOrder",
+		})
 		return
 	}
-	result, err := o.service.CreateOrderItems(&request)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"Error": "Wrong in processing.."})
+	result, errorResponse := o.service.CreateOrderItems(&request)
+	if errorResponse != nil {
+		c.JSON(http.StatusNotFound, errorResponse)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"Message": result})
+	c.JSON(http.StatusOK, result)
 }
 
 // Get All Order By UserId
@@ -70,7 +87,11 @@ func (o *OrderControlloer) GetAllOrderByUserId(c *gin.Context) {
 	id, err := strconv.Atoi(idStr)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid order ID"})
+		c.JSON(http.StatusBadRequest, custom.Error{
+			Message:    errorList.ErrBadRequest.Error(),
+			ErrorField: err.Error(),
+			Field:      "OrderController - CreateOrderItems",
+		})
 		return
 	}
 	if err != nil {
@@ -82,9 +103,9 @@ func (o *OrderControlloer) GetAllOrderByUserId(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": "Bad Request"})
 		return
 	}
-	result, err := o.service.GetAllOrderByUserId(id, &request)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "Have error in get orders"})
+	result, errorResponse := o.service.GetAllOrderByUserId(id, &request)
+	if errorResponse.Message != "" {
+		c.JSON(http.StatusNotFound, errorResponse)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"Data": result})
@@ -100,9 +121,9 @@ func (o *OrderControlloer) GetOrderById(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid order ID"})
 		return
 	}
-	result, err := o.service.GetOrderById(id)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch order details"})
+	result, errorResponse := o.service.GetOrderById(id)
+	if errorResponse.Message != "" {
+		c.JSON(http.StatusNotFound, errorResponse)
 		return
 	}
 
