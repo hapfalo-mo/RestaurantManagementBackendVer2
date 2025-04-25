@@ -3,6 +3,8 @@ package custom
 import "errors"
 
 var (
+	//Token
+	ErrInvalidToken         = errors.New("Invalid Token!")
 	ErrInvalidPassword      = errors.New("Password must be at least 10 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character")
 	ErrUserNotFound         = errors.New("Password or Phonenumber is incorrect!s")
 	ErrDbConnect            = errors.New("Can not get or tracking data")

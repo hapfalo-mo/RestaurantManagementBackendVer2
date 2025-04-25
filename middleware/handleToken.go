@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"RestuarantBackend/custom"
+	errorList "RestuarantBackend/error"
 	service "RestuarantBackend/service"
 	"net/http"
 	"strings"
@@ -9,12 +11,33 @@ import (
 )
 
 func AuthenticateMiddleware(c *gin.Context) {
-	token, err := c.Cookie("token")
-	if err != nil || token == "" {
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		var response = custom.Error{
+			Message:    errorList.ErrCreatingToken.Error(),
+			ErrorField: "Empty AuthHeader",
+			Field:      "Authen-Token",
+		}
+		c.JSON(http.StatusUnauthorized, response)
+		c.Abort()
+		return
+	}
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	if tokenString == "" {
+		var response2 = custom.Error{
+			Message:    errorList.ErrInvalidToken.Error(),
+			ErrorField: "Invalid Token",
+			Field:      "Authen-Token",
+		}
+		c.JSON(http.StatusUnauthorized, response2)
+		c.Abort()
+		return
+	}
+	if tokenString == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "No token found"})
 		return
 	}
-	ok, err := service.CallApiCheckUser(token)
+	ok, err := service.CallApiCheckUser(tokenString)
 	if err != nil || ok == false {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Can not verify user!"})
 		c.Abort()

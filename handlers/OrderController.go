@@ -90,7 +90,7 @@ func (o *OrderControlloer) GetAllOrderByUserId(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, custom.Error{
 			Message:    errorList.ErrBadRequest.Error(),
 			ErrorField: err.Error(),
-			Field:      "OrderController - CreateOrderItems",
+			Field:      "OrderController - GetAllOrderByUserId",
 		})
 		return
 	}
@@ -100,7 +100,11 @@ func (o *OrderControlloer) GetAllOrderByUserId(c *gin.Context) {
 	}
 	err = c.ShouldBindJSON(&request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "Bad Request"})
+		c.JSON(http.StatusBadRequest, custom.Error{
+			Message:    errorList.ErrBadRequest.Error(),
+			ErrorField: err.Error(),
+			Field:      "OrderController - GetAllOrderByUserId",
+		})
 		return
 	}
 	result, errorResponse := o.service.GetAllOrderByUserId(id, &request)

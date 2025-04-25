@@ -71,7 +71,7 @@ func CallApiCheckUser(token string) (bool, error) {
 		return false, err
 	}
 	req.Header.Add("Authorization", "Bearer "+token)
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: 30 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
 		return false, err
