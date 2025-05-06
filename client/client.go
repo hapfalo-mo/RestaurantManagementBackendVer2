@@ -11,7 +11,6 @@ func RunClient() restaurantuserservicerpb.RestaurantUserServiceClient {
 	if err != nil {
 		log.Fatalf("Error dialing : %v", err)
 	}
-
 	client := restaurantuserservicerpb.NewRestaurantUserServiceClient(cc)
 	return client
 }

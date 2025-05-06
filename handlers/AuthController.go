@@ -1,22 +1,24 @@
 package handlers
 
-// import (
-// 	"context"
-// 	"log"
-// 	"net/http"
+import (
+	"context"
+	"github.com/gin-gonic/gin"
+	"github.com/hapfalo-mo/RestaurantUserService/restaurantuserservicerpb"
+)
 
-// 	firebase "firebase.google.com/go/v4"
-// 	"google.golang.org/api/option"
-// )
+type AuthController struct{}
 
-// // func verifyToken(w http.ResponseWriter, r *http.Request) {
-// // 	ctx := context.Background()
-// // 	otp := option.WithCredentialsFile(`C:\Users\Admin\Desktop\GoLang\RestuarantBackend\jsp-project-accf6-firebase-adminsdk-fbsvc-6a896db303.json`)
-// // 	app, err := firebase.NewApp(ctx, nil, otp)
-// // 	if err != nil {
-// // 		log.Fatal("Something wrong ?")
-// // 	}
-
-// // 	// client, err := app.Auth()
-
-// // }
+func (au *AuthController) AuthUserHandler(c *gin.Context, us restaurantuserservicerpb.RestaurantUserServiceClient) (bool, error) {
+	token, err := c.Cookie("token")
+	if err != nil {
+		return false, err
+	}
+	req := &restaurantuserservicerpb.IsVerifyUserRequest{
+		Token: token,
+	}
+	_, err = us.IsAcceptUserAccess(context.Background(), req)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}

@@ -1,0 +1,24 @@
+syntax  = "proto3";
+
+package restaurantuserservice;
+
+option  go_package = "RestaurantUserService/restaurantuserservicerpb";
+
+message  SumRequest {
+    int32 num1 = 1;
+    int32 num2 = 2;
+}
+message SumReponse {
+    int32 result = 1;
+}
+message IsVerifyUserRequest{
+    string token = 1;
+}
+message isVerifyUserResponse{
+    bool response = 1;
+}
+service RestaurantUserService{
+  rpc  Sum(SumRequest) returns (SumReponse){}
+  rpc  IsAcceptUserAccess(IsVerifyUserRequest) returns (isVerifyUserResponse){}
+}
+
