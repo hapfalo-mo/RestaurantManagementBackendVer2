@@ -48,7 +48,8 @@ func SetRoutesAPI(r *gin.Engine) {
 			orders.POST("/create-order", middleware.AuthenticateMiddleware, orderController.CreateNewOrder)
 			orders.POST("/create-order-items", middleware.AuthenticateMiddleware, orderController.CreateOrderItems)
 			orders.POST("/get-all-order/:id", middleware.AuthenticateMiddleware, orderController.GetAllOrderByUserId)
-			orders.GET("get-order-detail/:id", middleware.AuthenticateMiddleware, orderController.GetOrderById)
+			orders.GET("/get-order-detail/:id", middleware.AuthenticateMiddleware, orderController.GetOrderById)
+			orders.POST("/send-otp/:id", middleware.AuthenticateMiddleware, orderController.GenerateOTP)
 		}
 	}
 }

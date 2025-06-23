@@ -1,11 +1,19 @@
 package service
 
 import (
+	config "RestuarantBackend/config"
 	"RestuarantBackend/custom"
 	"RestuarantBackend/db"
 	errorList "RestuarantBackend/error"
 	"RestuarantBackend/interfaces"
 	dto "RestuarantBackend/models/dto"
+	"context"
+	"crypto/rand"
+	"gopkg.in/gomail.v2"
+	"log"
+	"math/big"
+	"strconv"
+	"time"
 )
 
 var _ interfaces.OrderInterface = &OrderService{}
@@ -107,4 +115,64 @@ func (o OrderService) GetOrderById(id int) (result custom.Data[[]dto.OrderDetail
 		result.Data = append(result.Data, item)
 	}
 	return result, custom.Error{}
+}
+
+func (o OrderService) GenerateAndConfirmOTP(userId int, userEmail string) (result bool, err custom.Error) {
+
+	// Step 1 - Generate OTP
+	otp := CreateOTPCode()
+
+	// Step 2 - Save into Redis with Main Key is userEmail
+	redisRepo := config.NewRedisClient()
+	res := redisRepo.Set(context.Background(), userEmail, otp, 2*time.Minute).Err()
+	if res != nil {
+		return false, custom.Error{
+			Message:    "Error in GenerateAndConfirmOTP",
+			ErrorField: res.Error(),
+			Field:      "OrderService",
+		}
+		log.Printf("Error in GenerateAndConfirmOTP", time.Now(), res.Error())
+	}
+
+	// Step 3 - Send to Email
+	res = SendOTPToEmail(otp, userEmail)
+	if res != nil {
+		return false, custom.Error{
+			Message:    "Error in SendOTPToEmail",
+			ErrorField: res.Error(),
+			Field:      "OrderService",
+		}
+		log.Printf("Error in SendOTPToEmail", time.Now(), res.Error())
+	}
+	return true, custom.Error{}
+}
+
+// Domestic Function
+
+func CreateOTPCode() string {
+	min := 100000
+	max := 999999
+	num, err := rand.Int(rand.Reader, big.NewInt(int64(max-min+1)))
+	if err != nil {
+		return ""
+		log.Printf("Error in CreateOTPCode - OrderService.go", time.Now(), err.Error())
+	}
+	otp := int(num.Int64()) + min
+	return strconv.Itoa(otp)
+}
+
+func SendOTPToEmail(otp string, userEmail string) error {
+	m := gomail.NewMessage()
+	m.SetHeader("From", "chuongnguyen16112002@gmail.com")
+	m.SetHeader("To", userEmail)
+	m.SetHeader("Subject", "OTP SteakHouse")
+	m.SetBody("text/plain", "Mã của bạn là: "+otp)
+
+	d := gomail.NewDialer(
+		"smtp.gmail.com",
+		587,
+		"chuongnguyen16112002@gmail.com",
+		"zapsbztwesnstlww",
+	)
+	return d.DialAndSend(m)
 }

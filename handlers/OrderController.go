@@ -133,3 +133,21 @@ func (o *OrderControlloer) GetOrderById(c *gin.Context) {
 
 	c.JSON(http.StatusOK, result)
 }
+
+// Send OTP
+
+func (o *OrderControlloer) GenerateOTP(c *gin.Context) {
+	idStr := c.Param("id")
+	userEmail := c.Param("userEmail")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid order ID"})
+		return
+	}
+	_, errResponse := o.service.GenerateAndConfirmOTP(id, userEmail)
+	if errResponse.Message != "" {
+		c.JSON(http.StatusBadRequest, errResponse)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Gửi mã OTP thành công"})
+}
