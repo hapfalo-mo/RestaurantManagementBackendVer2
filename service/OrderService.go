@@ -9,6 +9,7 @@ import (
 	dto "RestuarantBackend/models/dto"
 	"context"
 	"crypto/rand"
+	"fmt"
 	"gopkg.in/gomail.v2"
 	"log"
 	"math/big"
@@ -117,7 +118,7 @@ func (o OrderService) GetOrderById(id int) (result custom.Data[[]dto.OrderDetail
 	return result, custom.Error{}
 }
 
-func (o OrderService) GenerateAndConfirmOTP(userId int, userEmail string) (result bool, err custom.Error) {
+func (o OrderService) GenerateAndConfirmOTP(userEmail string) (result bool, err custom.Error) {
 
 	// Step 1 - Generate OTP
 	otp := CreateOTPCode()
@@ -125,6 +126,7 @@ func (o OrderService) GenerateAndConfirmOTP(userId int, userEmail string) (resul
 	// Step 2 - Save into Redis with Main Key is userEmail
 	redisRepo := config.NewRedisClient()
 	res := redisRepo.Set(context.Background(), userEmail, otp, 2*time.Minute).Err()
+	fmt.Println("Set OTP to Redis", userEmail, otp)
 	if res != nil {
 		return false, custom.Error{
 			Message:    "Error in GenerateAndConfirmOTP",
@@ -147,8 +149,32 @@ func (o OrderService) GenerateAndConfirmOTP(userId int, userEmail string) (resul
 	return true, custom.Error{}
 }
 
-// Domestic Function
+func (o OrderService) IsValidOTP(request dto.OTPRequest) (bool, custom.Error) {
+	redisClient := config.NewRedisClient()
 
+	// Check OTP Valid
+	isValid := IsEqualOTP(request.UserEmail, request.OTP)
+	if !isValid {
+		return false, custom.Error{
+			Message:    "Mã OTP không hợp lệ",
+			ErrorField: "False",
+			Field:      "OrderService - IsValidOTP",
+		}
+		log.Printf("Error in IsValidOTP", time.Now(), "OrderService - IsValidOTP")
+	}
+	// Remote Key-Value into Redis
+	deleted, err := redisClient.Del(context.Background(), request.UserEmail).Result()
+	if err != nil {
+		return false, custom.Error{}
+		log.Printf("Error in IsValidOTP - OrderService", time.Now(), "Cannot Remove Value into Redis")
+	}
+	if deleted == 0 {
+		log.Printf("Warning: OTP key not found in Redis for %s", request.UserEmail)
+	}
+	return true, custom.Error{}
+}
+
+// Domestic Function
 func CreateOTPCode() string {
 	min := 100000
 	max := 999999
@@ -175,4 +201,20 @@ func SendOTPToEmail(otp string, userEmail string) error {
 		"zapsbztwesnstlww",
 	)
 	return d.DialAndSend(m)
+}
+
+func IsEqualOTP(userEmail string, otp string) bool {
+
+	redis := config.NewRedisClient()
+
+	// Check OTP FROM KEY AND VALUE
+	val, err := redis.Get(context.Background(), userEmail).Result()
+	if err != nil {
+		return false
+	}
+	if val != otp {
+		return false
+	} else {
+		return true
+	}
 }

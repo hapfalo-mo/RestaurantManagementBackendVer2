@@ -135,19 +135,32 @@ func (o *OrderControlloer) GetOrderById(c *gin.Context) {
 }
 
 // Send OTP
-
 func (o *OrderControlloer) GenerateOTP(c *gin.Context) {
-	idStr := c.Param("id")
 	userEmail := c.Param("userEmail")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid order ID"})
-		return
-	}
-	_, errResponse := o.service.GenerateAndConfirmOTP(id, userEmail)
+	_, errResponse := o.service.GenerateAndConfirmOTP(userEmail)
 	if errResponse.Message != "" {
 		c.JSON(http.StatusBadRequest, errResponse)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Gửi mã OTP thành công"})
+}
+
+// Authen OTP Code
+func (o *OrderControlloer) IsValidOTP(c *gin.Context) {
+	var request dto.OTPRequest
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, custom.Error{
+			Message:    errorList.ErrBadRequest.Error(),
+			ErrorField: err.Error(),
+			Field:      "OrderController - IsValidOTP",
+		})
+		return
+	}
+	_, errs := o.service.IsValidOTP(request)
+	if errs.Message != "" {
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"Data": "Xác nhận thành công!"})
 }

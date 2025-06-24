@@ -10,7 +10,7 @@ var RedisClient *redis.Client
 
 func NewRedisClient() *redis.Client {
 	client := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     "localhost:6397",
 		Password: "",
 		DB:       0,
 	})
