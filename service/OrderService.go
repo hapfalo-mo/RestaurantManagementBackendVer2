@@ -206,7 +206,6 @@ func SendOTPToEmail(otp string, userEmail string) error {
 func IsEqualOTP(userEmail string, otp string) bool {
 
 	redis := config.NewRedisClient()
-
 	// Check OTP FROM KEY AND VALUE
 	val, err := redis.Get(context.Background(), userEmail).Result()
 	if err != nil {

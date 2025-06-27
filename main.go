@@ -1,35 +1,46 @@
 package main
 
 import (
-	"RestuarantBackend/client"
+	"RestuarantBackend/config"
 	"RestuarantBackend/db"
+	"RestuarantBackend/models/events"
 	"RestuarantBackend/routers"
 	"context"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/hapfalo-mo/RestaurantUserService/restaurantuserservicerpb"
+	//"github.com/hapfalo-mo/RestaurantUserService/restaurantuserservicerpb"
 	"log"
 )
 
-func SumTwoNumber(c restaurantuserservicerpb.RestaurantUserServiceClient) {
-	resp, err := c.Sum(context.Background(), &restaurantuserservicerpb.SumRequest{
-		Num1: 5,
-		Num2: 3,
-	})
-	if err != nil {
-		log.Fatalf("Failed to call Sum Function: %v", err)
-	}
-	log.Printf("Sum result: %f ", resp.Result)
-}
+//func SumTwoNumber(c restaurantuserservicerpb.RestaurantUserServiceClient) {
+//	resp, err := c.Sum(context.Background(), &restaurantuserservicerpb.SumRequest{
+//		Num1: 5,
+//		Num2: 3,
+//	})
+//	if err != nil {
+//		log.Fatalf("Failed to call Sum Function: %v", err)
+//	}
+//	log.Printf("Sum result: %f ", resp.Result)
+//}
 
 func main() {
+	// Integrate Kafka Service
+	brokers := []string{"localhost:9092"}
+	topic := "order-events"
+	kafkaClient, err := config.GenerateNewKafkaClient(brokers, topic)
+	if err != nil {
+		log.Fatalf("Failed to create kafka client: %v", err)
+	}
+	defer kafkaClient.Close()
 
+	// Test publish event
+	PublishOrderService(kafkaClient)
 	// Connect Database
 	db.Connect()
 	defer db.DB.Close()
 	// Run client
-	cl := client.RunClient()
-	SumTwoNumber(cl)
+	//cl := client.RunClient()
+	//SumTwoNumber(cl)
 	// Initialize Router
 	router := gin.Default()
 
@@ -55,4 +66,22 @@ func main() {
 
 	// Run Server
 	router.Run(":1611")
+}
+
+func PublishOrderService(kafkaClient *config.KafkaClient) {
+	orderMessage := events.OrderMessage{
+		OrderId:  "1",
+		Message:  "Đặt đơn hàng thành công",
+		Amount:   3,
+		Money:    500000,
+		Username: "Dao Khuat",
+	}
+
+	ctx := context.Background()
+	err := kafkaClient.PublistOrderService(ctx, orderMessage)
+	if err != nil {
+		log.Println("Failed to publish order event:", err)
+	} else {
+		log.Println("Order event published successfully:", orderMessage)
+	}
 }
